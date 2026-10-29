@@ -3,145 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BurushaskiRAG — Retrieval-Augmented Search over the Burushaski Archive</title>
-<meta name="description" content="BurushaskiRAG is a retrieval-augmented generation system over the Burushaski Digital Archive: 62 dictionary entries in Srinagar and Gilgit dialects, recordings, and Srinagar community research. Runs entirely in the browser.">
+<title>BurushaskiRAG — ask the Burushaski archive</title>
+<meta name="description" content="Ask the Burushaski Digital Archive in plain English: dictionary words in Srinagar and Gilgit dialects, recordings, and community history.">
 <style>
-  :root{
-    --ink:#122019; --ink-2:#43534b; --ink-3:#6b7a71;
-    --paper:#f6f8f7; --card:#ffffff; --line:#dde5e0;
-    --accent:#c96a17; --accent-dark:#a5560f; --accent-soft:#fdf1e3;
-    --radius:14px;
-    --shadow:0 1px 2px rgba(18,32,25,.05),0 8px 24px rgba(18,32,25,.06);
-  }
+  :root{ --ink:#122019; --ink-2:#43534b; --ink-3:#75837b; --paper:#f6f8f7; --card:#fff; --line:#dde5e0; --accent:#c96a17; --accent-dark:#a5560f; --radius:14px; }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
   body{margin:0;background:var(--paper);color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;line-height:1.6}
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6}
   a{color:var(--accent-dark);text-decoration:none}
   a:hover{text-decoration:underline}
-  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
-
-  /* Header */
-  header.site{border-bottom:1px solid var(--line);background:rgba(255,255,255,.85);position:sticky;top:0;backdrop-filter:blur(8px);z-index:10}
-  .nav{display:flex;align-items:center;justify-content:space-between;height:60px}
-  .brand{font-weight:700;font-size:18px;letter-spacing:-.01em;color:var(--ink)}
+  .wrap{max-width:720px;margin:0 auto;padding:0 20px}
+  header.site{border-bottom:1px solid var(--line);background:#fff}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .brand{font-weight:700;font-size:17px;color:var(--ink)}
   .brand em{font-style:normal;color:var(--accent)}
-  .brand small{display:block;font-weight:500;font-size:11.5px;color:var(--ink-3);letter-spacing:.02em}
-  nav.links{display:flex;gap:22px;font-size:14px;font-weight:500}
-  nav.links a{color:var(--ink-2)}
-
-  /* Hero */
-  .hero{padding:56px 0 8px;text-align:left}
-  .eyebrow{display:inline-block;background:var(--accent-soft);color:var(--accent-dark);font-size:12.5px;font-weight:600;
-    padding:5px 12px;border-radius:999px;letter-spacing:.04em;text-transform:uppercase}
-  h1{font-size:42px;line-height:1.15;letter-spacing:-.02em;margin:18px 0 12px;font-weight:800}
+  .nav a{font-size:14px;font-weight:500;color:var(--ink-2)}
+  main{padding:52px 0 30px}
+  h1{font-size:36px;line-height:1.2;letter-spacing:-.02em;margin:0 0 10px;font-weight:800}
   h1 em{font-style:normal;color:var(--accent)}
-  .lede{font-size:18px;color:var(--ink-2);max-width:640px;margin:0}
-  .status{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:13.5px;color:var(--ink-2);
-    background:var(--card);border:1px solid var(--line);padding:7px 14px;border-radius:999px}
-  .status::before{content:"";width:8px;height:8px;border-radius:50%;background:#2e9e5b}
-
-  /* Stats */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0 8px}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
-  .stat b{display:block;font-size:24px;letter-spacing:-.01em}
-  .stat span{font-size:13px;color:var(--ink-3)}
-
-  /* Ask panel */
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin:22px 0}
-  .panel h2{margin:0 0 4px;font-size:19px;letter-spacing:-.01em}
-  .panel p.hint{margin:0 0 16px;color:var(--ink-2);font-size:14.5px}
+  .lede{font-size:17px;color:var(--ink-2);margin:0;max-width:560px}
+  .status{margin-top:14px;font-size:13.5px;color:var(--ink-3)}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin:26px 0;box-shadow:0 1px 2px rgba(18,32,25,.05),0 8px 24px rgba(18,32,25,.05)}
   .askrow{display:flex;gap:10px}
   input{flex:1;padding:13px 15px;font-size:16px;border:1px solid var(--line);border-radius:10px;background:#fbfcfb;color:var(--ink);font-family:inherit}
   input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
   button.go{padding:13px 24px;font-size:15.5px;font-weight:600;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit}
   button.go:hover{background:var(--accent-dark)}
   .chips{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
-  .chips span{width:100%;font-size:12.5px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
   .chip{background:#fff;border:1px solid var(--line);color:var(--ink-2);padding:8px 13px;font-size:13.5px;border-radius:999px;cursor:pointer;font-family:inherit}
   .chip:hover{border-color:var(--accent);color:var(--accent-dark)}
-
-  /* Results (classes used by app.js) */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-top:14px;box-shadow:var(--shadow)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-top:14px}
   .card.top{border-left:5px solid var(--accent)}
-  .meta{font-size:12.5px;color:var(--ink-3);margin-bottom:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-  .card p{margin:0;line-height:1.6}
+  .meta{font-size:12.5px;color:var(--ink-3);margin-bottom:8px}
+  .card p{margin:0}
   .refused{background:#fff;border:1.5px dashed var(--accent);border-radius:var(--radius);padding:18px;margin-top:14px;font-weight:500}
   .more h3{margin:24px 0 2px;font-size:15px}
-
-  /* Sections */
-  section.block{padding:34px 0 6px}
-  section.block h2{font-size:24px;letter-spacing:-.015em;margin:0 0 8px}
-  section.block>p{color:var(--ink-2);max-width:680px;margin:0 0 18px}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .step{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
-  .step .n{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent-dark);font-weight:700;font-size:14px;align-items:center;justify-content:center;margin-bottom:10px}
-  .step h3{margin:0 0 6px;font-size:16px}
-  .step p{margin:0;font-size:14.5px;color:var(--ink-2)}
-  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;font-size:14.5px}
-  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
-  th{background:#fbfcfb;font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3)}
-  tr:last-child td{border-bottom:0}
-  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;background:#eef2ef;padding:1px 6px;border-radius:6px}
-  pre{background:#122019;color:#e8f0ea;border-radius:var(--radius);padding:16px 18px;overflow-x:auto;font-size:13.5px;line-height:1.55}
-  pre code{background:none;padding:0;color:inherit}
-
-  footer.site{border-top:1px solid var(--line);margin-top:44px;padding:26px 0 40px;color:var(--ink-3);font-size:13.5px}
-  footer.site .cols{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-  @media (max-width:640px){
-    h1{font-size:32px}
-    .stats{grid-template-columns:repeat(2,1fr)}
-    .grid3{grid-template-columns:1fr}
-    .askrow{flex-direction:column}
-    nav.links{gap:14px;font-size:13px}
-  }
+  footer.site{border-top:1px solid var(--line);margin-top:40px;padding:22px 0 36px;color:var(--ink-3);font-size:13.5px}
+  @media (max-width:640px){ h1{font-size:29px} .askrow{flex-direction:column} }
 </style>
 </head>
 <body>
 
 <header class="site">
   <div class="wrap nav">
-    <div class="brand">Burushaski<em>RAG</em>
-      <small>Burushaski Digital Archive</small>
-    </div>
-    <nav class="links">
-      <a href="#how">How it works</a>
-      <a href="#evaluation">Evaluation</a>
-      <a href="https://github.com/aazimameen1122/burushaski-rag">GitHub</a>
-    </nav>
+    <div class="brand">Burushaski<em>RAG</em></div>
+    <a href="https://github.com/aazimameen1122/burushaski-rag">GitHub</a>
   </div>
 </header>
 
 <main class="wrap">
+  <h1>Ask the Burushaski <em>archive</em>.</h1>
+  <p class="lede">Word meanings in both dialects, the recordings, the community's history — answered from the archive itself. If it is not in the archive, it will say so.</p>
+  <p class="status" id="status">Loading…</p>
 
-  <div class="hero">
-    <span class="eyebrow">Retrieval-Augmented Generation</span>
-    <h1>Ask the Burushaski archive.<br>Get answers <em>from the archive</em>.</h1>
-    <p class="lede">BurushaskiRAG searches a dictionary of a language isolate — 62 entries across the
-      Srinagar and Gilgit dialects — together with field recordings and Srinagar community research.
-      Every answer is retrieved from the corpus and cited. If the corpus does not contain the answer,
-      the system says so instead of guessing.</p>
-    <div class="status" id="status">Loading the index…</div>
-  </div>
-
-  <div class="stats">
-    <div class="stat"><b>94</b><span>chunks indexed</span></div>
-    <div class="stat"><b>62</b><span>dictionary entries, 2 dialects</span></div>
-    <div class="stat"><b>1.00</b><span>retrieval Hit@1 (labelled set)</span></div>
-    <div class="stat"><b>0</b><span>API keys · servers · tracking</span></div>
-  </div>
-
-  <div class="panel" id="try">
-    <h2>Try it</h2>
-    <p class="hint">Runs entirely in your browser. Try a word lookup, a history question — then try the last example and watch it refuse.</p>
+  <div class="panel">
     <div class="askrow">
       <input id="q" type="text" placeholder="What is the Burushaski word for house?" aria-label="Your question">
       <button class="go" id="go">Ask</button>
     </div>
     <div class="chips">
-      <span>Example questions</span>
       <button class="chip">What is the Burushaski word for house?</button>
       <button class="chip">How do you say tomorrow in Burushaski?</button>
       <button class="chip">What is the Burushaski word for tea?</button>
@@ -151,62 +71,10 @@
     </div>
     <div id="result"></div>
   </div>
-
-  <section class="block" id="how">
-    <h2>How it works</h2>
-    <p>One small engine, implemented twice with identical behaviour — in Python (standard library only)
-       and in JavaScript for this page. No embeddings service, no vector database, no LLM.</p>
-    <div class="grid3">
-      <div class="step"><span class="n">1</span><h3>Chunk &amp; index</h3>
-        <p>Documents are split into heading-aware chunks (~900 characters, 150 overlap). Dictionary entries are indexed one per chunk so a word lookup lands on exactly one entry.</p></div>
-      <div class="step"><span class="n">2</span><h3>Retrieve</h3>
-        <p>A hybrid score — 0.75 × BM25 + 6.0 × TF-IDF cosine — ranks chunks for your question. The best match is shown first, with its source file, section and score.</p></div>
-      <div class="step"><span class="n">3</span><h3>Answer, or refuse</h3>
-        <p>Answers are extractive: text taken from the retrieved chunks, never generated freely. If 40% or more of a question's terms appear nowhere in the corpus, the system refuses rather than hallucinate.</p></div>
-    </div>
-    <pre><code>python3 ask.py "What is the Burushaski word for house?"
-# -&gt; ha (noun) · ha · /ha/ · "A-ha Hari Parbat-ulo bila." — My house is in Hari Parbat.
-#    cite: Burushaski-Digital-Archive/data.js :: ha (score 7.223)</code></pre>
-  </section>
-
-  <section class="block" id="evaluation">
-    <h2>Evaluation</h2>
-    <p>Measured on a labelled question set against this corpus (part of an 18-question suite run
-       across three sibling RAG systems built on the same engine). A small set — reported as a
-       smoke test, not a benchmark.</p>
-    <table>
-      <tr><th>Metric</th><th class="num">Score</th><th>Notes</th></tr>
-      <tr><td>Hit@1</td><td class="num">1.00</td><td>Correct chunk ranked first on every positive question</td></tr>
-      <tr><td>Hit@3</td><td class="num">1.00</td><td>Correct chunk inside the top three, every time</td></tr>
-      <tr><td>MRR</td><td class="num">1.00</td><td>Mean reciprocal rank across positive questions</td></tr>
-      <tr><td>Off-topic refusal</td><td class="num">1 / 1</td><td>Out-of-corpus question correctly refused</td></tr>
-      <tr><td>Latency</td><td class="num">&lt; 1 s</td><td>Full evaluation suite, offline, ordinary laptop CPU</td></tr>
-    </table>
-  </section>
-
-  <section class="block">
-    <h2>Limitations</h2>
-    <p>Retrieval is lexical, not neural: a question phrased with synonyms the corpus never uses can miss.
-       Answers are extractive and can read plainly; a language model behind the same retrieve-and-cite
-       contract is the planned next step. The corpus is the archive as it stands — 62 verified entries —
-       and grows as the archive does.</p>
-  </section>
-
 </main>
 
 <footer class="site">
-  <div class="wrap cols">
-    <div>
-      <strong style="color:var(--ink)">BurushaskiRAG</strong><br>
-      Built by Aazim Ameen · DYoD student, IUST Awantipora, Kashmir<br>
-      Part of a set of three RAG systems on one shared engine (BurushaskiRAG · DermaRAG · PortfolioRAG).
-    </div>
-    <div>
-      <a href="https://github.com/aazimameen1122/burushaski-rag">Source code</a> ·
-      <a href="https://github.com/aazimameen1-dotcom/Burushaski-Digital-Archive">Source archive</a><br>
-      Corpus data from the Burushaski Digital Archive.
-    </div>
-  </div>
+  <div class="wrap">Built by Aazim Ameen · Data from the <a href="https://github.com/aazimameen1-dotcom/Burushaski-Digital-Archive">Burushaski Digital Archive</a></div>
 </footer>
 
 <script src="app.js"></script>

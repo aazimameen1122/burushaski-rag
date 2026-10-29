@@ -62,7 +62,7 @@ class RagIndex {
     const uniq = [...new Set(qterms)];
     const oov = uniq.length ? uniq.filter(t => !this.df.has(t)).length / uniq.length : 1;
     if (!hits.length || hits[0].score < 0.6 || oov >= 0.4) {
-      return { answer: "Not in this corpus - no chunk scored high enough to answer from. I won't guess.", hits: [], refused: true };
+      return { answer: "Not in the archive — I don't have this in my data, so I won't guess.", hits: [], refused: true };
     }
     return { answer: hits[0].text, hits, refused: false };
   }
@@ -76,7 +76,7 @@ if (typeof document !== "undefined") {
   const $ = id => document.getElementById(id);
   fetch("data.json").then(r => r.json()).then(d => {
     idx = new RagIndex(d.chunks);
-    $("status").textContent = d.chunks.length + " chunks indexed - ready. Ask below.";
+    $("status").textContent = "Ready — ask below.";
   }).catch(() => { $("status").textContent = "Could not load data.json"; });
 
   function ask(q) {
@@ -89,9 +89,9 @@ if (typeof document !== "undefined") {
     }
     const [top, ...rest] = res.hits;
     box.innerHTML =
-      `<div class="card top"><div class="meta">Best match - ${top.source} :: ${top.heading || ""} (score ${top.score})</div><p>${top.text}</p></div>` +
+      `<div class="card top"><p>${top.text}</p></div>` +
       (rest.length ? `<div class="more"><h3>Also retrieved</h3>` + rest.map(h =>
-        `<div class="card"><div class="meta">${h.source} :: ${h.heading || ""} (score ${h.score})</div><p>${h.text}</p></div>`).join("") + `</div>` : "");
+        `<div class="card"><p>${h.text}</p></div>`).join("") + `</div>` : "");
   }
   window.addEventListener("DOMContentLoaded", () => {
     $("go").addEventListener("click", () => ask($("q").value));

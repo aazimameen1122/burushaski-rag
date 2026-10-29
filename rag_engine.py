@@ -126,7 +126,7 @@ class Index:
         qterms = tokenize(query)
         oov = (sum(1 for t in set(qterms) if t not in self.df) / max(1, len(set(qterms)))) if qterms else 1.0
         if not hits or hits[0]["score"] < min_score or oov >= max_oov:
-            return {"query": query, "answer": "Not in this corpus - no chunk scored high enough to answer from. I won't guess.",
+            return {"query": query, "answer": "Not in the archive - I don't have this in my data, so I won't guess.",
                     "citations": [], "hits": hits, "oov_rate": round(oov, 3)}
         qset = set(tokenize(query))
         picked, cites = [], []
