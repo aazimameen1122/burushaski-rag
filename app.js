@@ -87,11 +87,8 @@ if (typeof document !== "undefined") {
       box.innerHTML = `<div class="refused">${res.answer}</div>`;
       return;
     }
-    const [top, ...rest] = res.hits;
-    box.innerHTML =
-      `<div class="card top"><p>${top.text}</p></div>` +
-      (rest.length ? `<div class="more"><h3>Also retrieved</h3>` + rest.map(h =>
-        `<div class="card"><p>${h.text}</p></div>`).join("") + `</div>` : "");
+    const top = res.hits[0];
+    box.innerHTML = `<div class="card top"><p>${top.text}</p></div>`;
   }
   window.addEventListener("DOMContentLoaded", () => {
     $("go").addEventListener("click", () => ask($("q").value));
