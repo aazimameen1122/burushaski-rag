@@ -1,50 +1,119 @@
 # BurushaskiRAG
 
-**Live demo: https://aazimameen1122.github.io/burushaski-rag/**
+**Retrieval-augmented search over the Burushaski Digital Archive — answers from the corpus, citations on every result, and a refusal when the corpus does not know.**
 
-A small retrieval-augmented generation (RAG) system over the
-[Burushaski Digital Archive](https://github.com/aazimameen1-dotcom/Burushaski-Digital-Archive).
-Ask it a question in plain English; it answers from the archive itself,
-names its source on every result, and refuses when the answer is not in
-the corpus instead of guessing.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-c96a17)](https://aazimameen1122.github.io/burushaski-rag/)
+[![Python](https://img.shields.io/badge/Python-3.x%20·%20stdlib%20only-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Retrieval Hit@1](https://img.shields.io/badge/Retrieval%20Hit%401-1.00-2e9e5b)](#evaluation)
+[![API Keys](https://img.shields.io/badge/API%20keys-none-43534b)](#architecture)
 
-Burushaski is a language isolate spoken in Hunza, Nagar and Yasin
-(Gilgit-Baltistan), with a small, endangered enclave in Srinagar, Kashmir.
-This RAG covers both: the dictionary and the Srinagar community research.
+### ▶ Live demo: **https://aazimameen1122.github.io/burushaski-rag/**
 
-## Corpus (94 chunks)
-- 62 dictionary entries - Srinagar + Gilgit dialects, Perso-Arabic script,
-  IPA, and an example sentence per dialect
-- 4 audio archive recordings (folktale, devotional, two folk songs)
-- Archive README + the Srinagar Burushaski research report
-  (history and origins, demographics, dialect features, endangerment)
+Ask in plain English — *"What is the Burushaski word for house?"*, *"When did the princes of Hunza and Nagar migrate to Kashmir?"* — and get the archive's own text back, with its source. Ask something outside the archive and the system declines: *"Not in this corpus. I won't guess."*
 
-## How it works
-One engine, two runtimes with identical rankings:
-- `rag_engine.py` - Python, stdlib only. Heading-aware chunking, hybrid
-  BM25 + TF-IDF retrieval, extractive cited answers, and an
-  out-of-vocabulary refusal guard (>=40% unseen terms -> refuse).
-- `app.js` - the same engine in JavaScript, running fully in the browser
-  on the GitHub Pages demo. No server, no API key, no tracking.
+---
 
-## Run the Python version
-```bash
-python3 ask.py "What is the Burushaski word for house?"
-python3 ask.py "When did the princes of Hunza and Nagar migrate to Kashmir?"
-python3 ask.py "What is the capital of France?"   # -> refuses, correctly
+## Overview
+
+[Burushaski](https://en.wikipedia.org/wiki/Burushaski) is a language isolate spoken in Hunza, Nagar and Yasin (Gilgit-Baltistan), with a small, endangered enclave in Srinagar, Kashmir. The [Burushaski Digital Archive](https://github.com/aazimameen1-dotcom/Burushaski-Digital-Archive) documents the Srinagar variety. **BurushaskiRAG makes that archive answerable**: one small retrieval engine over the dictionary, the recordings catalogue, and the community research report.
+
+It is deliberately built without the usual stack — no embeddings API, no vector database, no LLM, no server. The same engine runs in Python and, identically, in the browser on the live demo.
+
+## Features
+
+- **Dialect-aware lookup** — dictionary answers carry both Srinagar and Gilgit forms, Perso-Arabic script, IPA, and an example sentence per dialect
+- **Cited answers** — every result names its source file, section and retrieval score
+- **Hallucination guard** — an out-of-vocabulary refusal rule (≥ 40% unseen terms) makes off-corpus questions fail closed, not creatively
+- **Zero infrastructure** — static site + one JSON index; the Python version needs nothing beyond the standard library
+- **Measured, not asserted** — retrieval quality is evaluated on a labelled question set (see below)
+
+## Architecture
+
+```
+        corpus                          engine                         answer
+ ┌───────────────────┐        ┌──────────────────────────┐        ┌────────────────────┐
+ │ data.js dictionary │        │ chunk (heading-aware)    │        │ extractive answer  │
+ │ recordings         │ ─────▶ │ index (BM25 + TF-IDF)    │ ─────▶ │ + source citation  │
+ │ README · report    │        │ retrieve (hybrid score)  │        │ or a refusal       │
+ └───────────────────┘        │ refuse (OOV guard)       │        └────────────────────┘
+                               └──────────────────────────┘
 ```
 
-## Measured results
-Labelled test set (5 positive + 1 off-topic question on this corpus,
-part of an 18-question suite across 3 sibling RAG systems):
-Hit@1 **1.00**, Hit@3 **1.00**, MRR **1.00**, off-topic refused 1/1.
-Small set - a smoke test, not a benchmark.
+| Stage | Implementation |
+|---|---|
+| Chunking | Heading-aware, ~900 chars with 150-char overlap; one chunk per dictionary entry |
+| Retrieval | Hybrid score = 0.75 × BM25 (k1 = 1.5, b = 0.75) + 6.0 × TF-IDF cosine |
+| Generation | Extractive — answer text is taken from retrieved chunks, never freely generated |
+| Refusal | Question with ≥ 40% out-of-vocabulary terms, or no chunk above threshold, returns a refusal |
+| Runtimes | `rag_engine.py` (Python, stdlib only) and `app.js` (browser) — rankings verified identical |
 
-## Honest limits
-- Retrieval is lexical (BM25 + TF-IDF), not neural embeddings; synonyms
-  the corpus never uses can miss.
-- Answers are extractive, so they can read choppy. An LLM behind the same
-  retrieve-and-cite contract is the planned next step.
+## Corpus
 
-Part of a set of three RAG systems built 29 Oct 2026 (BurushaskiRAG,
-DermaRAG, PortfolioRAG) by Aazim Ameen, DYoD student at IUST, Kashmir.
+| Source | Content | Chunks |
+|---|---|---|
+| `Burushaski-Digital-Archive/data.js` | 62 dictionary entries (Srinagar + Gilgit, script, IPA, examples) | 62 |
+| `Burushaski-Digital-Archive/data.js` | 4 recordings: folktale, devotional, two folk songs | 4 |
+| Archive README + Srinagar research report | Language background, history & origins, demographics, dialect features, endangerment | 28 |
+| **Total** | | **94** |
+
+## Quickstart
+
+**Browser** — open the [live demo](https://aazimameen1122.github.io/burushaski-rag/). Nothing to install.
+
+**Python**
+
+```bash
+git clone https://github.com/aazimameen1122/burushaski-rag.git
+cd burushaski-rag
+python3 ask.py "What is the Burushaski word for house?"
+# Burushaski word: ha (part of speech: noun). Meaning in English: house. ...
+#   cite: Burushaski-Digital-Archive/data.js :: ha (score 7.223)
+
+python3 ask.py "What is the capital of France?"
+# Not in this corpus - no chunk scored high enough to answer from. I won't guess.
+```
+
+## Evaluation
+
+Labelled set for this corpus: 5 positive questions + 1 off-topic question (part of an 18-question suite across three sibling RAG systems on the same engine).
+
+| Metric | Score |
+|---|---|
+| Hit@1 | **1.00** |
+| Hit@3 | **1.00** |
+| MRR | **1.00** |
+| Off-topic correctly refused | 1 / 1 |
+| Latency | Full suite < 1 s, offline |
+
+A small set — a smoke test, not a benchmark. The refusal threshold was calibrated on it: real questions measured ≤ 25% out-of-vocabulary terms; off-topic questions ≥ 50%.
+
+## Project structure
+
+```
+burushaski-rag/
+├── index.html       # Live demo page (GitHub Pages)
+├── app.js           # RAG engine + UI, JavaScript port
+├── data.json        # The index: 94 chunks with sources
+├── rag_engine.py    # RAG engine, Python (stdlib only)
+├── ask.py           # Command-line interface
+└── README.md
+```
+
+## Limitations
+
+- **Lexical retrieval.** BM25 + TF-IDF cannot match synonyms the corpus never uses; neural embeddings would recover some of those misses.
+- **Extractive answers.** Faithful by construction, plain in style. Plugging a language model behind the same retrieve-and-cite contract is the planned next step.
+- **Corpus size.** 62 dictionary entries is the verified archive as it stands; the RAG improves as the archive grows.
+
+## Roadmap
+
+- [ ] LLM generation layer behind the existing citation + refusal contract
+- [ ] Grow the index with new verified dictionary entries and elder narratives
+- [ ] Semantic (embedding) retrieval as an optional second ranker
+
+## Author
+
+**Aazim Ameen** — photographer and applied-AI builder from Kashmir; DYoD student at IUST Awantipora.
+BurushaskiRAG is one of three RAG systems built on this engine on 29 Oct 2026 (BurushaskiRAG · DermaRAG · PortfolioRAG).
+
+Source data: [Burushaski Digital Archive](https://github.com/aazimameen1-dotcom/Burushaski-Digital-Archive)
