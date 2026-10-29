@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BurushaskiRAG - ask the Burushaski archive</title>
+<meta name="description" content="A small retrieval-augmented generation (RAG) system over the Burushaski Digital Archive: 62 dictionary entries in Srinagar and Gilgit dialects, plus recordings and a research report. Runs fully in your browser.">
+<style>
+  :root { --paper:#EDF2EF; --ink:#1d2622; --accent:#d97b29; --card:#ffffff; --line:#c9d4cd; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family: Georgia, 'Times New Roman', serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 18px 60px; }
+  h1 { font-size: 34px; margin: 0 0 6px; }
+  h1 span { color: var(--accent); }
+  .sub { margin: 0 0 4px; font-size: 17px; }
+  .status { color:#4a5a52; font-size: 14px; margin-bottom: 22px; }
+  .askrow { display:flex; gap:8px; }
+  input { flex:1; padding: 13px 14px; font-size: 16px; border:1px solid var(--line); border-radius: 8px; background: #fff; }
+  button { padding: 13px 20px; font-size: 16px; border:0; border-radius: 8px; background: var(--accent); color:#fff; cursor:pointer; }
+  .chips { margin: 14px 0 6px; display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { background:#fff; border:1px solid var(--line); color:var(--ink); padding: 8px 12px; font-size: 14px; border-radius: 999px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 14px; }
+  .card.top { border-left: 5px solid var(--accent); }
+  .meta { font-size: 13px; color:#4a5a52; margin-bottom: 8px; font-family: ui-monospace, monospace; }
+  .card p { margin:0; line-height: 1.55; }
+  .refused { background:#fff; border:1px dashed var(--accent); border-radius:10px; padding:16px; margin-top:14px; }
+  .more h3 { margin: 22px 0 0; font-size: 16px; }
+  footer { margin-top: 36px; font-size: 14px; color:#4a5a52; line-height:1.6; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Burushaski<span>RAG</span></h1>
+  <p class="sub">Ask the Burushaski Digital Archive in plain English. Every answer is retrieved from the archive itself - and if the archive does not contain it, the model refuses instead of guessing.</p>
+  <p class="status" id="status">Loading the index...</p>
+
+  <div class="askrow">
+    <input id="q" type="text" placeholder="What is the Burushaski word for house?" aria-label="Your question">
+    <button id="go">Ask</button>
+  </div>
+  <div class="chips">
+    <button class="chip">What is the Burushaski word for house?</button>
+    <button class="chip">How do you say tomorrow in Burushaski?</button>
+    <button class="chip">What is the Burushaski word for tea?</button>
+    <button class="chip">When did the princes of Hunza and Nagar migrate to Kashmir?</button>
+    <button class="chip">Which folk song recordings are in the archive?</button>
+    <button class="chip">What is the capital of France?</button>
+  </div>
+
+  <div id="result"></div>
+
+  <footer>
+    <p><strong>How it works:</strong> one small engine - heading-aware chunking, hybrid BM25 + TF-IDF retrieval, extractive answers with the source named on every result, and an out-of-vocabulary refusal guard. The same engine runs in Python (<code>rag_engine.py</code>) and in your browser (<code>app.js</code>); rankings match. Corpus: 62 dictionary entries (Srinagar + Gilgit dialects, IPA, examples), 4 recordings, archive README and the Srinagar Burushaski research report - 94 chunks.</p>
+    <p>Measured on a labelled test set (Python build): Hit@1 1.00, Hit@3 1.00, off-topic questions refused. Small test set - a smoke test, not a benchmark. Built by Aazim Ameen with the Burushaski Digital Archive: <a href="https://github.com/aazimameen1-dotcom/Burushaski-Digital-Archive">source archive</a>.</p>
+  </footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
